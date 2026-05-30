@@ -1,0 +1,30 @@
+Copy/paste this prompt into ChatGPT when you want help using this recovery package:
+
+I am recovering a LibreSDR / Pluto+ style SDR that can boot from SD but not from internal QSPI. I have a recovery package with burn_flash/mtdblock0, mtdblock1, mtdblock2, and mtdblock3. Please help me verify that my board matches the package before I write QSPI.
+
+I will paste the output of these commands:
+
+cat /proc/mtd
+cat /proc/cmdline
+ls -lh /mnt/sd/burn_flash
+mount
+df -h
+
+Please check that:
+1. The /proc/mtd partition sizes match:
+   mtd0 00100000 qspi-fsbl-uboot
+   mtd1 00020000 qspi-uboot-env
+   mtd2 000e0000 qspi-nvmfs
+   mtd3 01e00000 qspi-linux
+2. The recovery file sizes match:
+   mtdblock0 = 1,048,576 bytes
+   mtdblock1 = 131,072 bytes
+   mtdblock2 = 917,504 bytes
+   mtdblock3 = 31,457,280 bytes
+3. The SD card is mounted correctly.
+4. It is safe to run:
+   cd /mnt/sd/burn_flash
+   chmod +x autoconfig.sh
+   ./autoconfig.sh
+
+After the script finishes, help me interpret the output. If it prints SUCCESS, tell me how to power off, remove the SD card, and test internal QSPI boot.

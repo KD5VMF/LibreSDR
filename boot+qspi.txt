@@ -1,0 +1,71 @@
+LibreSDR / Pluto+ QSPI Recovery Notes - v0.33
+================================================
+
+Purpose
+-------
+This package restores internal QSPI boot on a LibreSDR / Pluto+ style SDR when the board can still boot from SD card but no longer boots from internal QSPI.
+
+This recovery image boots as:
+
+    Welcome to Pluto
+    v0.33-dirty
+
+That is expected. The goal is to recover a working QSPI boot path first. Upgrade only after you have backed up the working QSPI image.
+
+Required QSPI layout
+--------------------
+Use this package only if `cat /proc/mtd` shows:
+
+    mtd0: 00100000 00010000 "qspi-fsbl-uboot"
+    mtd1: 00020000 00010000 "qspi-uboot-env"
+    mtd2: 000e0000 00010000 "qspi-nvmfs"
+    mtd3: 01e00000 00010000 "qspi-linux"
+
+Files
+-----
+
+    boot_file/BOOT.BIN
+    boot_file/image.ub
+        Optional SD boot files. If your existing SD card already boots the SDR,
+        you can keep it and only copy the burn_flash folder to the SD card.
+
+    burn_flash/mtdblock0
+    burn_flash/mtdblock1
+    burn_flash/mtdblock2
+    burn_flash/mtdblock3
+        Full raw QSPI partition images.
+
+    burn_flash/autoconfig.sh
+        Checked restore script. It verifies sizes, backs up current QSPI,
+        writes all four images, and compares the written flash.
+
+Quick recovery commands
+-----------------------
+
+1. Boot the SDR from SD card.
+2. Log in on serial console or SSH.
+   Common credentials are root / analog.
+3. Mount the SD card:
+
+    mkdir -p /mnt/sd
+    mount /dev/mmcblk0p1 /mnt/sd
+
+4. Confirm the QSPI layout:
+
+    cat /proc/mtd
+
+5. Run the restore:
+
+    cd /mnt/sd/burn_flash
+    chmod +x autoconfig.sh
+    ./autoconfig.sh
+
+6. Type YES when prompted.
+7. If the script prints SUCCESS:
+
+    sync
+    poweroff
+
+8. Remove the SD card and power the SDR back on.
+
+Do not run this on different hardware. Do not copy stock PlutoSDR firmware onto a LibreSDR unless you know it matches your hardware.
